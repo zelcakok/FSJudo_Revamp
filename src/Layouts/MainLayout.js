@@ -20,12 +20,14 @@ import {
   Marker,
 } from "react-google-maps";
 
+//SEO Stuff
+import FacebookProvider, { Page } from 'react-facebook';
+
 class Introduction extends Component {
   render(){
     return(
       <div style={{padding:"10px", maxWidth:"1000px"}}>
         <Card>
-          <CardHeader title="富善柔道會" subheader="Fu Shin Judo" style={{fontWeight:"bold"}}/>
           <CardMedia style={{paddingTop:'40.25%'}}
                      image={Banner}
                      title="Fu Shin Judo"/>
@@ -61,34 +63,69 @@ class Introduction extends Component {
   }
 }
 
+class Event {
+  constructor(start, title){
+    this.start = new Date(moment(start));
+    this.end = new Date(moment(start).add(2,"hours"));
+    this.title = moment(start).format("HH") + "\n" + moment(start).add(2,"hours").format("HH");
+  }
+}
+
+class TimeableList extends Component {
+  render(){
+    return (
+      <div style={{padding:"10px", maxWidth:"1000px"}}>
+        <Card>
+          <CardHeader title={"上課時間"} subheader={"最近更新: 2018-05-29"}/>
+          <CardContent>
+            <p><strong>5月</strong></p>
+            <p>逢星期二 (晚上): 19:00 - 21:00</p>
+            <p>逢星期日 (晚上): 19:00 - 21:00</p>
+            <hr/>
+            <p><strong>6月</strong></p>
+            <p>逢星期二 (晚上): 19:00 - 21:00</p>
+            <p>逢星期日 (早上): 10:00 - 12:00</p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+}
+
 class Timeable extends Component {
 
   constructor(props){
     super(props);
     this.state = {
-      lastUpdate: moment().format("YYYY-MM-DD") //Change this when the DB is ready
+      lastUpdate: moment().format("YYYY-MM-DD"), //Change this when the DB is ready
+      events: [
+        new Event("2018-05-29T19:00:00"),
+        new Event("2018-06-03T10:00:00"),
+        new Event("2018-06-10T10:00:00"),
+        new Event("2018-06-17T10:00:00"),
+        new Event("2018-06-24T10:00:00"),
+
+        new Event("2018-06-05T19:00:00"),
+        new Event("2018-06-12T19:00:00"),
+        new Event("2018-06-19T19:00:00"),
+        new Event("2018-06-26T19:00:00"),
+      ]
     }
     BigCalendar.momentLocalizer(moment);
-  }
-
-  getMonth=()=>{
-    var month = moment().format("M");
-    return month;
   }
 
   render(){
     return (
       <div style={{padding:"10px", maxWidth:"1000px"}}>
         <Card>
-          <CardHeader title={this.getMonth()+"月 上課時間表"} subheader={"Last Update: " + this.state.lastUpdate}/>
+          <CardHeader title={"上課時間表"} subheader={"最近更新: " + this.state.lastUpdate}/>
           <CardContent>
             <BigCalendar
-              style={{minHeight:"300px"}}
-              events={[]}
-              toolbar={false}
-              views={['month']}
-              startAccessor='startDate'
-              endAccessor='endDate'
+              defaultDate={new Date()}
+              defaultView="month"
+              views={['month','week']}
+              events={this.state.events}
+              style={{ height: "70vh" }}
             />
           </CardContent>
         </Card>
@@ -133,20 +170,48 @@ class Location extends Component {
   }
 }
 
+class FacebookPage extends Component {
+  render() {
+    return (
+      <div style={{padding:"10px", maxWidth:"1000px"}}>
+        <Card>
+          <CardHeader title="Facebook 專頁"/>
+          <CardContent>
+            <div class="fb-page"
+                 data-href="https://www.facebook.com/fsjudo/"
+                 data-small-header="false"
+                 data-width="500"
+                 data-adapt-container-width="true"
+                 data-hide-cover="false"
+                 data-show-facepile="true">
+                 <blockquote cite="https://www.facebook.com/fsjudo/" class="fb-xfbml-parse-ignore">
+                   <a href="https://www.facebook.com/fsjudo/">富善柔道會</a>
+                 </blockquote>
+             </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+}
+
 class Main extends Component {
   render(){
     return(
-      <div>
+      <div style={{overflow:"hidden"}}>
         <div>
           <AppBarLayout/>
         </div>
         <div>
-          <Grid container spacing={16}>
-            <Grid item xs={12}>
+          <Grid container spacing={8}>
+            <Grid item xs={12} sm={6}>
               <Introduction/>
             </Grid>
             <Grid item xs={12} sm={6}>
-              <Timeable/>
+              <TimeableList/>
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <FacebookPage/>
             </Grid>
             <Grid item xs={12} sm={6}>
               <Location/>

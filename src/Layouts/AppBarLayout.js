@@ -14,6 +14,9 @@ import Grey from '@material-ui/core/colors/grey';
 
 import DrawerLayout from './DrawerLayout';
 
+//SEO
+import MessengerMessageUs from 'react-messenger-message-us';
+
 class AppBarLayout extends Component {
 
   constructor(props){
@@ -21,11 +24,13 @@ class AppBarLayout extends Component {
     this.drawer = React.createRef();
     this.styles = {
       MenuButton : {
-        marginLeft: "-15px"
+        marginLeft: "-15px",
+        display: "none",
       },
       AppBarTitle : {
         marginLeft: "5px",
-        flex: 1
+        flex: 1,
+        fontWeight: "bold"
       },
       Drawer : {
         width: "200px"
@@ -50,12 +55,13 @@ class AppBarLayout extends Component {
               <MenuIcon />
             </IconButton>
             <Typography variant="title" style={this.styles.AppBarTitle}>
-              Fu Shin Judo
+              {`富善柔道會`}
             </Typography>
-            <Button variant="raised">
+            <Button variant="raised" style={{display:"none"}}>
               SIGN IN
               <AccountsIcon style={this.styles.SignIn}/>
             </Button>
+            <MessengerMessageUs pageId="689817011157193" appId="886993984812120" />
           </Toolbar>
         </AppBar>
         <DrawerLayout ref={this.drawer}/>
