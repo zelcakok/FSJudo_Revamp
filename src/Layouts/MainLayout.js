@@ -25,6 +25,13 @@ import Timeline from 'react-calendar-timeline';
 import 'react-calendar-timeline/lib/Timeline.css';
 import containerResizeDetector from 'react-calendar-timeline/lib/resize-detector/container';
 
+import List from '@material-ui/core/List';
+import ListItem from '@material-ui/core/ListItem';
+import ListItemText from '@material-ui/core/ListItemText';
+import Avatar from '@material-ui/core/Avatar';
+import PhoneIcon from '@material-ui/icons/Phone';
+import EmailIcon from '@material-ui/icons/Email';
+
 class Introduction extends Component {
   render(){
     return(
@@ -174,42 +181,6 @@ class Calendar extends Component {
   }
 }
 
-// class Timeable extends Component {
-//
-//   constructor(props){
-//     super(props);
-//     this.state = {
-//       lastUpdate: moment().format("YYYY-MM-DD") //Change this when the DB is ready
-//     }
-//     BigCalendar.momentLocalizer(moment);
-//   }
-//
-//   getMonth=()=>{
-//     var month = moment().format("M");
-//     return month;
-//   }
-//
-//   render(){
-//     return (
-//       <div style={{padding:"10px", width:window.innerWidth>1000? "1000px":window.innerWidth+"px"}}>
-//         <Card style={{maxWidth:"1000px", float:"none", margin:"auto"}}>
-//           <CardHeader title={this.getMonth()+"月 上課時間表"} subheader={"Last Update: " + this.state.lastUpdate}/>
-//           <CardContent>
-//             <BigCalendar
-//               style={{minHeight:"300px"}}
-//               events={[]}
-//               toolbar={false}
-//               views={['month']}
-//               startAccessor='startDate'
-//               endAccessor='endDate'
-//             />
-//           </CardContent>
-//         </Card>
-//       </div>
-//     );
-//   }
-// }
-
 class Location extends Component {
   constructor(props){
     super(props);
@@ -250,19 +221,36 @@ class Location extends Component {
 }
 
 class Contact extends Component {
+
+  phone=()=>{
+    window.location="tel:92674030";
+  }
+
+  mail=()=>{
+    window.location="mailto:info@fsjud.com";
+  }
+
   render(){
     return(
       <div style={{padding:"10px"}}>
         <Card style={{maxWidth:"1000px", float:"none", margin:"auto"}}>
           <CardHeader title="聯絡我們" subheader="Contact us"/>
           <CardContent>
-            <Typography paragraph style={{fontSize:"15px"}}>
-              查詢或報名電話: <a href="tel:92674030">9267 4030</a>
-            </Typography>
+            <ListItem button style={{maxWidth:"400px"}}>
+              <Avatar>
+                <PhoneIcon />
+              </Avatar>
+              <ListItemText primary="查詢 / 報名" secondary="Inquiry / Application" onClick={this.phone}/>
+              <a href="tel:92674030">9267 4030</a>
+            </ListItem>
 
-            <Typography paragraph style={{fontSize:"15px"}}>
-              電郵地址: <a href="mailto:info@fsjud.com">info@fsjud.com</a>
-            </Typography>
+            <ListItem button style={{maxWidth:"400px"}}>
+              <Avatar>
+                <EmailIcon />
+              </Avatar>
+              <ListItemText primary="電郵地址" secondary="Email address" onClick={this.mail}/>
+              <a href="mailto:info@fsjud.com">info@fsjud.com</a>
+            </ListItem>
           </CardContent>
         </Card>
       </div>
@@ -271,6 +259,32 @@ class Contact extends Component {
 }
 
 class Main extends Component {
+
+  constructor(props){
+    super(props);
+    this.state = {
+      layout : 12
+    }
+  }
+
+  resize=()=>{
+    console.log("Width: " , window.innerWidth);
+    if(window.innerWidth > 1000) this.setState({layout:6});
+    else this.setState({layout:12});
+  }
+
+  componentWillMount(){
+    this.resize();
+  }
+
+  componentDidMount(){
+    window.addEventListener("resize", this.resize);
+  }
+
+  componentWillUnMount(){
+    window.removeEventListener("resize", this.resize);
+  }
+
   render(){
     return(
       <div>
@@ -278,21 +292,17 @@ class Main extends Component {
           <AppBarLayout/>
         </div>
         <div style={{backgroundColor:"#EEEEEE"}}>
-          <Grid container spacing={8}>
-            <Grid item xs={12}>
+          <Grid container spacing={0}>
+            <Grid item xs={this.state.layout}>
               <Introduction/>
             </Grid>
-          </Grid>
-          <Grid container spacing={8}>
-            <Grid item xs={12}>
+            <Grid item xs={this.state.layout}>
               <Calendar startTime={6} endTIme={22}/>
             </Grid>
-          </Grid>
-          <Grid container spacing={0}>
-            <Grid item xs={12}>
+            <Grid item xs={this.state.layout}>
               <Location/>
             </Grid>
-            <Grid item xs={12}>
+            <Grid item xs={this.state.layout}>
               <Contact/>
             </Grid>
           </Grid>
