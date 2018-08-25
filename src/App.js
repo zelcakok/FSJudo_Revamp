@@ -4,6 +4,8 @@ import './App.css';
 
 import Main from './Layouts/MainLayout';
 
+import Debug from './Layouts/DebugLayout';
+
 class App extends Component {
   render() {
     return (

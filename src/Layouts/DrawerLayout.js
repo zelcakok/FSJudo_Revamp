@@ -12,12 +12,17 @@ import DateRangeIcon from '@material-ui/icons/DateRange';
 import WorkIcon from '@material-ui/icons/Work';
 import BeachAccessIcon from '@material-ui/icons/BeachAccess';
 import ArrowBackIcon from '@material-ui/icons/ArrowBack';
+import AssignmentIcon from '@material-ui/icons/Assignment';
 import Divider from '@material-ui/core/Divider';
 
 class Content extends Component {
   constructor(props){
     super(props);
     this.parent = props.parent;
+  }
+
+  navHome=()=>{
+    window.location = "/";
   }
 
   render(){
@@ -27,21 +32,21 @@ class Content extends Component {
           <ListItemIcon><ArrowBackIcon/></ListItemIcon>
           <ListItemText>Close Menu</ListItemText>
         </MenuItem>
-        <Divider light />
+        <Divider light/>
         <List>
           <ListItem button>
             <Avatar>
               <HomeIcon />
             </Avatar>
-            <ListItemText primary="Home" secondary="Dashboard"/>
+            <ListItemText primary="首頁" secondary="Home" onClick={this.navHome}/>
           </ListItem>
           <ListItem button>
             <Avatar>
-              <DateRangeIcon />
+              <AssignmentIcon />
             </Avatar>
-            <ListItemText primary="Calendar" secondary="Show events" />
+            <ListItemText primary="會章" secondary="Constitution" />
           </ListItem>
-        </List>
+        </List>        
       </div>
     );
   }

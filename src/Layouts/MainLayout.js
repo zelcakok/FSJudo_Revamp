@@ -20,14 +20,16 @@ import {
   Marker,
 } from "react-google-maps";
 
-//SEO Stuff
-import FacebookProvider, { Page } from 'react-facebook';
+import Timeline from 'react-calendar-timeline';
+// make sure you include the timeline stylesheet or the timeline will not be styled
+import 'react-calendar-timeline/lib/Timeline.css';
+import containerResizeDetector from 'react-calendar-timeline/lib/resize-detector/container';
 
 class Introduction extends Component {
   render(){
     return(
-      <div style={{padding:"10px", maxWidth:"1000px"}}>
-        <Card>
+      <div style={{padding:"10px"}}>
+        <Card style={{maxWidth:"1000px", float:"none", margin:"auto"}}>
           <CardMedia style={{paddingTop:'40.25%'}}
                      image={Banner}
                      title="Fu Shin Judo"/>
@@ -55,7 +57,6 @@ class Introduction extends Component {
             <Typography paragraph style={{fontSize:"15px"}}>
             本 會 主 教 練 為 中 國 香 港 柔 道 總 會 註 冊 教 練 ． 亦 為 前 香 港 柔 道 代 表 隊 成 員， 代 表 香 港 參 加 不 少 大 型 國 際 賽 事 ， 曾 於 國 際 上 獲 得 不 少 獎 項，成 績 裴 然 ． 任 教 經 驗 豐 富 ，曾 於 各 青 少 年 中 心 、 康 體 柔 道 班 、國 際 學 校 等 地 任 教 柔 道。
             </Typography>
-
           </CardContent>
         </Card>
       </div>
@@ -63,76 +64,151 @@ class Introduction extends Component {
   }
 }
 
-class Event {
-  constructor(start, title){
-    this.start = new Date(moment(start));
-    this.end = new Date(moment(start).add(2,"hours"));
-    this.title = moment(start).format("HH") + "\n" + moment(start).add(2,"hours").format("HH");
-  }
-}
-
-class TimeableList extends Component {
-  render(){
-    return (
-      <div style={{padding:"10px", maxWidth:"1000px"}}>
-        <Card>
-          <CardHeader title={"上課時間"} subheader={"最近更新: 2018-05-29"}/>
-          <CardContent>
-            <p><strong>5月</strong></p>
-            <p>逢星期二 (晚上): 19:00 - 21:00</p>
-            <p>逢星期日 (晚上): 19:00 - 21:00</p>
-            <hr/>
-            <p><strong>6月</strong></p>
-            <p>逢星期二 (晚上): 19:00 - 21:00</p>
-            <p>逢星期日 (早上): 10:00 - 12:00</p>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-}
-
-class Timeable extends Component {
-
+class Calendar extends Component {
   constructor(props){
     super(props);
     this.state = {
-      lastUpdate: moment().format("YYYY-MM-DD"), //Change this when the DB is ready
-      events: [
-        new Event("2018-05-29T19:00:00"),
-        new Event("2018-06-03T10:00:00"),
-        new Event("2018-06-10T10:00:00"),
-        new Event("2018-06-17T10:00:00"),
-        new Event("2018-06-24T10:00:00"),
-
-        new Event("2018-06-05T19:00:00"),
-        new Event("2018-06-12T19:00:00"),
-        new Event("2018-06-19T19:00:00"),
-        new Event("2018-06-26T19:00:00"),
-      ]
+      lastUpdate: moment().add(-30, 'day').format("YYYY-MM-DD"), //Change this when the DB is ready
     }
-    BigCalendar.momentLocalizer(moment);
+    this.startTime = props.startTime? props.startTime : 0;
+    this.endTime = props.endTime? props.endTime : 24;
+    this.weekDay=["", "Tuesday", "Sunday"];
+    this.eventList=[];
+
+    this.eventList["Tuesday"]={from: 19, to: 21, name:"活動室(1) / Activity room(1)", duration: 2, styles:{backgroundColor:"rgb(76, 204, 238)"}};
+    this.eventList["Sunday"]={from: 10, to: 12, name:"活動室(1) / Activity room(1)", duration: 2, styles:{backgroundColor:"rgb(76, 238, 141)"}};
+    this.buildCalendar();
   }
 
-  render(){
+  setEventList=(eventList)=>{
+    this.eventList = eventList;
+  }
+
+  getEventStatus=(event, hour)=>{
+    if(event==null) return null;
+    if(event.from == hour) return "START";
+    if(event.to == hour) return "END";
+    if(event.from <= hour && event.to >= hour) return "WITHIN";
+    return null;
+  }
+
+  getEvent=(strWeekDay, hour)=>{
+    var eventStatus = this.getEventStatus(this.eventList[strWeekDay], hour);
+    if(eventStatus == null) return null;
+    else return {
+        status: eventStatus,
+        event: this.eventList[strWeekDay]
+      }
+  }
+
+  buildDayCell=(strWeekDay, hour)=>{
+    var eventStatus = this.getEvent(strWeekDay, hour);
+    if(eventStatus==null) return (<td key={strWeekDay+hour}></td>);
+    if(eventStatus.status == "START") return (
+      <td rowSpan={eventStatus.event.duration} key={strWeekDay+hour} style={eventStatus.event.styles}>
+        {eventStatus.event.name}
+      </td>
+    );
+    else return null;
+  }
+
+  buildCalendar=()=>{
+    this.calendar=[];
+    for(var i=this.startTime; i<this.endTime; i++){
+      this.calendar.push(this.buildRow(i));
+    }
+  }
+
+  buildRow=(hour)=>{
+    var days=[]
+    for(var weekDay=0; weekDay<this.weekDay.length; weekDay++) {
+      days.push(this.buildDayCell(this.weekDay[weekDay+1], hour))
+    }
     return (
-      <div style={{padding:"10px", maxWidth:"1000px"}}>
-        <Card>
-          <CardHeader title={"上課時間表"} subheader={"最近更新: " + this.state.lastUpdate}/>
+      <tr key={hour}>
+        <td>{hour<=9? "0"+hour : hour}:00</td>
+        {days}
+      </tr>
+    )
+  }
+
+  getMonth=()=>{
+    return moment().format("M");
+  }
+
+  render() {
+    return(
+      <div style={{padding:"10px"}}>
+        <Card style={{maxWidth:"1000px", float:"none", margin:"auto"}}>
+          <CardHeader title={this.getMonth()+"月 上課時間表"} subheader={"Last Update: " + this.state.lastUpdate}/>
           <CardContent>
-            <BigCalendar
-              defaultDate={new Date()}
-              defaultView="month"
-              views={['month','week']}
-              events={this.state.events}
-              style={{ height: "70vh" }}
-            />
+            <table className="timeable">
+              <thead>
+                <tr>
+                  {
+                    this.weekDay.map((key, value)=>(
+                      <td key={value}>{key}</td>
+                    ))
+                  }
+                </tr>
+              </thead>
+              <tbody>
+                {
+                  this.calendar
+                }
+              </tbody>
+              <tfoot>
+                <tr>
+                  {
+                    this.weekDay.map((key, value)=>(
+                      <td key={value}>{key}</td>
+                    ))
+                  }
+                </tr>
+              </tfoot>
+            </table>
           </CardContent>
         </Card>
       </div>
-    );
+    )
   }
 }
+
+// class Timeable extends Component {
+//
+//   constructor(props){
+//     super(props);
+//     this.state = {
+//       lastUpdate: moment().format("YYYY-MM-DD") //Change this when the DB is ready
+//     }
+//     BigCalendar.momentLocalizer(moment);
+//   }
+//
+//   getMonth=()=>{
+//     var month = moment().format("M");
+//     return month;
+//   }
+//
+//   render(){
+//     return (
+//       <div style={{padding:"10px", width:window.innerWidth>1000? "1000px":window.innerWidth+"px"}}>
+//         <Card style={{maxWidth:"1000px", float:"none", margin:"auto"}}>
+//           <CardHeader title={this.getMonth()+"月 上課時間表"} subheader={"Last Update: " + this.state.lastUpdate}/>
+//           <CardContent>
+//             <BigCalendar
+//               style={{minHeight:"300px"}}
+//               events={[]}
+//               toolbar={false}
+//               views={['month']}
+//               startAccessor='startDate'
+//               endAccessor='endDate'
+//             />
+//           </CardContent>
+//         </Card>
+//       </div>
+//     );
+//   }
+// }
 
 class Location extends Component {
   constructor(props){
@@ -151,17 +227,20 @@ class Location extends Component {
 
   render(){
     return (
-      <div style={{padding:"10px", maxWidth:"1000px"}}>
-        <Card>
+      <div style={{padding:"10px"}}>
+        <Card style={{maxWidth:"1000px", float:"none", margin:"auto"}}>
           <CardHeader title="富善體育館" subheader="Fu Shin Sport Centre"/>
           <CardContent>
             <div>
-            <this.MapWithAMarker
-              googleMapURL="https://maps.googleapis.com/maps/api/js?key=AIzaSyAJHn4Tr0qzAz_IFmi4rPJk0jUbFdPMKyI&v=3.exp&libraries=geometry,drawing,places"
-              loadingElement={<div style={{ height: `100%` }} />}
-              containerElement={<div style={{ height: `400px` }} />}
-              mapElement={<div style={{ height: `100%` }} />}
-            />
+              <Typography paragraph style={{fontSize:"15px"}}>
+              地址：富善體育館 · 大埔富善邨多層停車場6樓
+              </Typography>
+              <this.MapWithAMarker
+                googleMapURL="https://maps.googleapis.com/maps/api/js?key=AIzaSyAJHn4Tr0qzAz_IFmi4rPJk0jUbFdPMKyI&v=3.exp&libraries=geometry,drawing,places"
+                loadingElement={<div style={{ height: `100%` }} />}
+                containerElement={<div style={{ height: `400px` }} />}
+                mapElement={<div style={{ height: `100%` }} />}
+              />
             </div>
           </CardContent>
         </Card>
@@ -170,24 +249,20 @@ class Location extends Component {
   }
 }
 
-class FacebookPage extends Component {
-  render() {
-    return (
-      <div style={{padding:"10px", maxWidth:"1000px"}}>
-        <Card>
-          <CardHeader title="Facebook 專頁"/>
+class Contact extends Component {
+  render(){
+    return(
+      <div style={{padding:"10px"}}>
+        <Card style={{maxWidth:"1000px", float:"none", margin:"auto"}}>
+          <CardHeader title="聯絡我們" subheader="Contact us"/>
           <CardContent>
-            <div class="fb-page"
-                 data-href="https://www.facebook.com/fsjudo/"
-                 data-small-header="false"
-                 data-width="500"
-                 data-adapt-container-width="true"
-                 data-hide-cover="false"
-                 data-show-facepile="true">
-                 <blockquote cite="https://www.facebook.com/fsjudo/" class="fb-xfbml-parse-ignore">
-                   <a href="https://www.facebook.com/fsjudo/">富善柔道會</a>
-                 </blockquote>
-             </div>
+            <Typography paragraph style={{fontSize:"15px"}}>
+              查詢或報名電話: <a href="tel:92674030">9267 4030</a>
+            </Typography>
+
+            <Typography paragraph style={{fontSize:"15px"}}>
+              電郵地址: <a href="mailto:info@fsjud.com">info@fsjud.com</a>
+            </Typography>
           </CardContent>
         </Card>
       </div>
@@ -198,23 +273,27 @@ class FacebookPage extends Component {
 class Main extends Component {
   render(){
     return(
-      <div style={{overflow:"hidden"}}>
+      <div>
         <div>
           <AppBarLayout/>
         </div>
-        <div>
+        <div style={{backgroundColor:"#EEEEEE"}}>
           <Grid container spacing={8}>
-            <Grid item xs={12} sm={6}>
+            <Grid item xs={12}>
               <Introduction/>
             </Grid>
-            <Grid item xs={12} sm={6}>
-              <TimeableList/>
+          </Grid>
+          <Grid container spacing={8}>
+            <Grid item xs={12}>
+              <Calendar startTime={6} endTIme={22}/>
             </Grid>
-            <Grid item xs={12} sm={6}>
-              <FacebookPage/>
-            </Grid>
-            <Grid item xs={12} sm={6}>
+          </Grid>
+          <Grid container spacing={0}>
+            <Grid item xs={12}>
               <Location/>
+            </Grid>
+            <Grid item xs={12}>
+              <Contact/>
             </Grid>
           </Grid>
         </div>
