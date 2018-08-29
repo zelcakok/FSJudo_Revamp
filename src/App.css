@@ -1,25 +1,5 @@
-.App {
-  text-align: center;
-}
-
-.App-logo {
-  animation: App-logo-spin infinite 20s linear;
-  height: 80px;
-}
-
-.App-header {
-  background-color: #222;
-  height: 150px;
-  padding: 20px;
-  color: white;
-}
-
-.App-title {
-  font-size: 1.5em;
-}
-
-.App-intro {
-  font-size: large;
+* {
+  font-family: 'Roboto', sans-serif;
 }
 
 .timeable {
@@ -35,7 +15,14 @@
   background-color: #f5f5f5;
 }
 
-@keyframes App-logo-spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+.timeable thead td {
+  font-weight: bold;
+}
+
+.readonlyDoc {
+  display: none !important;
+}
+
+.displayName {
+  text-transform: none !important;
 }
